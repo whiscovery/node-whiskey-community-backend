@@ -24,9 +24,27 @@ MongoClient.connect('mongodb+srv://whiscovery:wjdwlsdnr5728@cluster0.ngeoi.mongo
     })
     app.post('/input', (req, res) => {
         console.log("접근")
-        db.collection('whiskey').insertOne( req.body , function(에러, 결과){
-            console.log('저장완료'); 
-            });
-        res.send('전송완료')
+        db.collection('whiskeyid').findOne({name: '위스키갯수카운터'}, (err, result) => {
+            var totalCounter = result.totalWhiskey;
+            db.collection('whiskey').insertOne( {
+                _id: (totalCounter + 1),
+                제품명: req.body.제품명,
+                종류: req.body.종류,
+                도수: req.body.도수,
+                이미지: req.body.이미지,
+                가격대: req.body.가격대,
+                테이스팅: req.body.테이스팅,
+                설명: req.body.설명,
+                기타지식: req.body.기타지식,
+                코멘트: req.body.코멘트,
+            } , function(에러, 결과){
+                db.collection('whiskeyid').updateOne( {name : '위스키갯수카운터' } , { $inc : { totalWhiskey
+                    : 1 } } , function(에러, 결과){
+                    console.log('수정완료')
+                  })
+                console.log('저장완료'); 
+                });
+            res.send('전송완료')
+        });
     });
 });
