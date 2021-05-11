@@ -20,7 +20,9 @@ MongoClient.connect('mongodb+srv://whiscovery:wjdwlsdnr5728@cluster0.ngeoi.mongo
     });
 
     app.get('/whiskey', (req, res) =>{
-        res.send('Whiskey')
+        db.collection('whiskey').find().toArray((err, result) => {
+            res.json(result)
+        })
     })
     app.post('/input', (req, res) => {
         console.log("접근")
