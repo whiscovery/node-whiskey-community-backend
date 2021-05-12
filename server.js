@@ -24,8 +24,23 @@ MongoClient.connect('mongodb+srv://whiscovery:wjdwlsdnr5728@cluster0.ngeoi.mongo
             res.json(result)
         })
     })
+    app.get('/whiskey/:id', (req, res)=>{
+        db.collection('whiskey').findOne({_id: parseInt(req.params.id) }, (err, data) => {
+            if(err) return res.status(500).json({error: err});
+            if(!data) return res.status(404).json({error: 'Not found'});
+            res.json(data);
+        })
+    })
+    app.post('/editpost', (req, res) =>{
+        db.collection('whiskey').updateOne({_id : parseInt(req.body._id) }, {$set : req.body}, () =>
+        {
+            console.log("수정완료");
+            const url = '/whiskey/' + req.body._id
+            res.redirect(url)
+        })
+    })
     app.post('/input', (req, res) => {
-        console.log("접근")
+        console.log("삽입 접근")
         db.collection('whiskeyid').findOne({name: '위스키갯수카운터'}, (err, result) => {
             var totalCounter = result.totalWhiskey;
             db.collection('whiskey').insertOne( {
@@ -49,4 +64,9 @@ MongoClient.connect('mongodb+srv://whiscovery:wjdwlsdnr5728@cluster0.ngeoi.mongo
             res.send('전송완료')
         });
     });
+    app.post('/comment', (req, res) => {
+        console.log(req.body)
+        const url = '/whiskey/'+req.body.postid
+        res.redirect(url)
+    })
 });
