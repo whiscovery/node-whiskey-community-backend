@@ -31,6 +31,13 @@ MongoClient.connect('mongodb+srv://whiscovery:wjdwlsdnr5728@cluster0.ngeoi.mongo
             res.json(data);
         })
     })
+    app.get('/comment/:id', (req, res)=>{
+        db.collection('whiskeycomment').findOne({위스키번호: parseInt(req.params.id) }, (err, data) => {
+            if(err) return res.status(500).json({error: err});
+            if(!data) return res.status(404).json({error: 'Not found'});
+            res.json(data);
+        })
+    })
     app.post('/editpost', (req, res) =>{
         db.collection('whiskey').updateOne({_id : parseInt(req.body._id) }, {$set : req.body}, () =>
         {
@@ -39,7 +46,7 @@ MongoClient.connect('mongodb+srv://whiscovery:wjdwlsdnr5728@cluster0.ngeoi.mongo
             res.redirect(url)
         })
     })
-    app.post('/input', (req, res) => {
+    app.post('/writepost', (req, res) => {
         console.log("삽입 접근")
         db.collection('whiskeyid').findOne({name: '위스키갯수카운터'}, (err, result) => {
             var totalCounter = result.totalWhiskey;
@@ -64,9 +71,26 @@ MongoClient.connect('mongodb+srv://whiscovery:wjdwlsdnr5728@cluster0.ngeoi.mongo
             res.send('전송완료')
         });
     });
-    app.post('/comment', (req, res) => {
+    app.post('/writecomment', (req, res) => {
         console.log(req.body)
-        const url = '/whiskey/'+req.body.postid
+        db.collection("whiskeycommentid").findOne({name: '코멘트갯수카운터'}, (err, result) => {
+            var commentCounter = result.totalComment;
+            db.collection('whiskeycomment').insertOne({
+                _id: (commentCounter + 1),
+                이름: req.body.이름,
+                장소: req.body.장소,
+                일시: req.body.일시,
+                내용: req.body.내용,
+                위스키번호: req.body.whiskeyid
+            }, function(에러, 결과){
+                db.collection('whiskeycommentid').updateOne( {name: '코멘트갯수카운터'}, { $inc: { totalComment : 1 }}, function(에러, 결과){
+                    console.log('코멘트 갯수 수정 완료')
+                    console.log(에러)
+                });
+                console.log('코멘트 저장 완료')
+            });
+        });
+        const url = '/whiskey/'+req.body.whiskeyid
         res.redirect(url)
-    })
+    });
 });
