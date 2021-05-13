@@ -32,10 +32,11 @@ MongoClient.connect('mongodb+srv://whiscovery:wjdwlsdnr5728@cluster0.ngeoi.mongo
         })
     })
     app.get('/comment/:id', (req, res)=>{
-        db.collection('whiskeycomment').findOne({위스키번호: parseInt(req.params.id) }, (err, data) => {
+        db.collection('whiskeycomment').find({"위스키번호": parseInt(req.params.id) }).toArray( (err, comment) => { //find쓰기 위해서 toArray
             if(err) return res.status(500).json({error: err});
-            if(!data) return res.status(404).json({error: 'Not found'});
-            res.json(data);
+            if(!comment) return res.status(404).json({error: 'Not found'});
+
+            res.json(comment);
         })
     })
     app.post('/editpost', (req, res) =>{
