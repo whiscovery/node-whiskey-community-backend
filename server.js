@@ -72,6 +72,15 @@ MongoClient.connect('mongodb+srv://whiscovery:wjdwlsdnr5728@cluster0.ngeoi.mongo
             res.send('전송완료')
         });
     });
+    // 테이스팅 점수를 whiskey collection의 테이스팅점수에 추가($push)
+    app.post('/writepost/taisting', (req, res) => {
+        db.collection('whiskey').updateMany({_id : parseInt(req.body.whiskeyid) }, {$push : { 테이스팅점수: req.body.테이스팅점수}}, () =>
+        {
+            console.log("수정완료");
+            const url = '/whiskey/' + req.body.whiskeyid
+            res.redirect(url)
+        })
+    });
     app.post('/writecomment', (req, res) => {
         console.log(req.body)
         db.collection("whiskeycommentid").findOne({name: '코멘트갯수카운터'}, (err, result) => {
@@ -82,7 +91,7 @@ MongoClient.connect('mongodb+srv://whiscovery:wjdwlsdnr5728@cluster0.ngeoi.mongo
                 장소: req.body.장소,
                 일시: req.body.일시,
                 내용: req.body.내용,
-                위스키번호: req.body.whiskeyid
+                위스키번호: parseInt(req.body.whiskeyid)
             }, function(에러, 결과){
                 db.collection('whiskeycommentid').updateOne( {name: '코멘트갯수카운터'}, { $inc: { totalComment : 1 }}, function(에러, 결과){
                     console.log('코멘트 갯수 수정 완료')
