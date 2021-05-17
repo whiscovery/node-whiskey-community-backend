@@ -32,7 +32,7 @@ MongoClient.connect('mongodb+srv://whiscovery:wjdwlsdnr5728@cluster0.ngeoi.mongo
         })
     })
     app.get('/comment/search/:email', (req, res)=>{
-        db.collection('whiskeycomment').find({"email": req.params.email }).toArray( (err, comment) => { //find쓰기 위해서 toArray
+        db.collection('whiskeycomment').find({"이메일": req.params.email }).toArray( (err, comment) => { //find쓰기 위해서 toArray
             if(err) return res.status(500).json({error: err});
             if(!comment) return res.status(404).json({error: 'Not found'});
            
