@@ -31,6 +31,14 @@ MongoClient.connect('mongodb+srv://whiscovery:wjdwlsdnr5728@cluster0.ngeoi.mongo
             res.json(data);
         })
     })
+    app.get('/comment/search/:email', (req, res)=>{
+        db.collection('whiskeycomment').find({"email": req.params.email }).toArray( (err, comment) => { //find쓰기 위해서 toArray
+            if(err) return res.status(500).json({error: err});
+            if(!comment) return res.status(404).json({error: 'Not found'});
+           
+            res.json(comment);
+        })
+    })
     app.get('/comment/:id', (req, res)=>{
         db.collection('whiskeycomment').find({"위스키번호": parseInt(req.params.id) }).toArray( (err, comment) => { //find쓰기 위해서 toArray
             if(err) return res.status(500).json({error: err});
@@ -91,6 +99,9 @@ MongoClient.connect('mongodb+srv://whiscovery:wjdwlsdnr5728@cluster0.ngeoi.mongo
                 장소: req.body.장소,
                 일시: req.body.일시,
                 내용: req.body.내용,
+                위스키이름: req.body.위스키이름,
+                이메일: req.body.이메일,
+
                 위스키번호: parseInt(req.body.whiskeyid)
             }, function(에러, 결과){
                 db.collection('whiskeycommentid').updateOne( {name: '코멘트갯수카운터'}, { $inc: { totalComment : 1 }}, function(에러, 결과){
