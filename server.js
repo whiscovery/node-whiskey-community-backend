@@ -2,23 +2,50 @@ const express = require('express');
 const app = express();
 const cors = require('cors')
 const MongoClient = require('mongodb').MongoClient;
+const PORT = process.env.PORT || 4000;
+const auth = require('./auth')
+// const passport = require('passport');
+// const LocalStrategy = require('passport-local').Strategy;
+// const session = require('express-session')
+const logger = require('morgan')
 
 app.use(cors());
 app.use(express.json())
-
-
+app.use(logger('dev'))
+// app.use(session({secret : 'WhiscoverySecret', resave : true, saveUninitialized: false}));
+// app.use(passport.initialize());
+// app.use(passport.session());
 
 var db;
 MongoClient.connect('mongodb+srv://whiscovery:wjdwlsdnr5728@cluster0.ngeoi.mongodb.net/myFirstDatabase?retryWrites=true&w=majority', { useUnifiedTopology: true }, function (에러, client) {
     if (에러) return console.log(에러)
     db = client.db('whiskeyapp');
-    app.listen(4000, () => {
+    app.listen(PORT, () => {
         console.log('Listening on 4000')
     })
     app.get('/', function(요청, 응답) { 
         응답.sendFile(__dirname +'/index.html')
     });
+    app.post('/login', async (req, res) => {
+        const {email, password} = req.body
+        const user = await db.collection('user').findOne({"email": req.body.email, "password": req.body.password}, (err, data) => {
+            if(err) return res.status(500).json({error: err});
+            if(!data) return res.status(404).json({error: 'Not found'});
 
+        console.log(data);
+        if (!data || !data.email) return res.status(401).json({error: 'Login failure'})
+        const accessToken = auth.signToken(data.email)
+        console.log(accessToken)
+        res.json({accessToken})
+        })
+    })
+    app.get('/myworld', auth.ensureAuth(), async (req, res) => {
+        const user = await db.collection('user').findOne({email: req.body.email}, (err, data) => {
+            if(err) return res.status(500).json({error: err});
+            if(!data) return res.status(404).json({error: 'Not found'});
+            res.json({data})
+      })
+    })
     app.get('/whiskey', (req, res) =>{
         db.collection('whiskey').find().toArray((err, result) => {
             res.json(result)
