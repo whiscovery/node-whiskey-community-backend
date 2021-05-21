@@ -40,7 +40,7 @@ MongoClient.connect('mongodb+srv://whiscovery:wjdwlsdnr5728@cluster0.ngeoi.mongo
         })
     })
     app.get('/myworld', auth.ensureAuth(), async (req, res) => {
-        const user = await db.collection('user').findOne({email: req.body.email}, (err, data) => {
+        const user = await db.collection('user').findOne({"email": req.body.email}, (err, data) => {
             if(err) return res.status(500).json({error: err});
             if(!data) return res.status(404).json({error: 'Not found'});
             res.json({data})
