@@ -1,20 +1,31 @@
 const express = require('express');
 const app = express();
 const cors = require('cors')
+// const MongoClient = require('mongodb').MongoClient;
 const PORT = process.env.PORT || 4000;
+// const auth = require('./auth')
 const mongoose = require('mongoose');
-const { User } = require("./models/User");
-const { Whiskey } = require("./models/Whiskey");
-const cookieParser = require("cookie-parser");
-const { auth } = require("./middleware/auth");
+// const passport = require('passport');
+// const LocalStrategy = require('passport-local').Strategy;
+// const session = require('express-session')
+const logger = require('morgan')
 
 app.use(cors());
-app.use(express.json());
-app.use(cookieParser());
+app.use(express.json())
+// app.use(logger('dev'))
+// app.use(session({secret : 'WhiscoverySecret', resave : true, saveUninitialized: false}));
+// app.use(passport.initialize());
+// app.use(passport.session());
 
-//Mongoose 로 DB 접속
+
+// var db;
+// MongoClient.connect('mongodb+srv://whiscovery:wjdwlsdnr5728@cluster0.ngeoi.mongodb.net/myFirstDatabase?retryWrites=true&w=majority', { useUnifiedTopology: true }, function (에러, client) {
+// if (에러) return console.log(에러)
+// db = client.db('whiskeyapp');
+// });
+
 const dbAddress = "mongodb+srv://whiscovery:wjdwlsdnr5728@cluster0.ngeoi.mongodb.net/whiskeyapp?retryWrites=true&w=majority"
-var db = mongoose.connect(dbAddress, {
+mongoose.connect(dbAddress, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
     useCreateIndex: true,
@@ -23,97 +34,12 @@ var db = mongoose.connect(dbAddress, {
   .then(() => console.log("MongoDB Connected"))
   .catch((err) => console.log(err));
 
-// Port 오픈
-app.listen(PORT, () => {
-    console.log(`Listening on ${PORT}`)
-})
-// /로 get 요청
-app.get('/', function(req, res) { 
-    res.send("Hello Whisckey guys!!!")
-});
-app.post("/register", (req, res) => {
-    const user = new User(req.body);
-    user.save((err, userInfo) => {
-        if (err) return res.json({ success: false, err });
-        return res.status(200).json({ success: true });
-    });
-});
-app.post("/login", (req, res) => {
-    //로그인을할때 아이디와 비밀번호를 받는다
-    User.findOne({ email: req.body.email }, (err, user) => {
-      if (err || !user) {
-        return res.json({
-          loginSuccess: false,
-          message: "존재하지 않는 아이디입니다.",
-        });
-      }
-      user
-        .comparePassword(req.body.password)
-        .then((isMatch) => {
-          if (!isMatch) {
-            return res.json({
-              loginSuccess: false,
-              message: "비밀번호가 일치하지 않습니다",
-            });
-          }
-          //비밀번호가 일치하면 토큰을 생성한다
-          //해야될것: jwt 토큰 생성하는 메소드 작성
-        user
-            .generateToken()
-            .then((user) => {
-                console.log("2");
-            res.cookie("x_auth", user.token).status(200).json({
-                loginSuccess: true,
-                userId: user._id,
-            });
-            })
-            .catch((err) => {
-            res.status(400).send(err);
-            });
-
-        })
-        .catch((err) => res.json({ loginSuccess: false, err }));
-    });
-  });
-
-
-//user_id를 찾아서(auth를 통해 user의 정보에 들어있다) db에있는 토큰값을 비워준다
-app.get("/logout", auth, (req, res) => {
-    User.findOneAndUpdate({ _id: req.user._id }, { token: "" }, (err, user) => {
-      if (err) return res.json({ success: false, err });
-      res.clearCookie("x_auth");
-      console.log("logout");
-      return res.status(200).send({
-        success: true,
-      });
-    });
-  });
-
-  //auth 미들웨어를 가져온다
-//auth 미들웨어에서 필요한것 : Token을 찾아서 검증하기
-app.get("/auth", auth, (req, res) => {
-    //auth 미들웨어를 통과한 상태 이므로
-    //req.user에 user값을 넣어줬으므로
-    console.log("1");
-    res.status(200).json({
-      _id: req._id,
-    //   isAdmin: req.user.role === 09 ? false : true,
-      isAuth: true,
-      email: req.user.email,
-    //   name: req.user.name,
-    //   lastname: req.user.lastname,
-    //   role: req.user.role,
-    //   image: req.user.image,
-    });
-  });
-
-app.get('/whiskey', (req, res) =>{
-    User.find().toArray((err, result) => {
-        res.json(result)
+    app.listen(PORT, () => {
+        console.log(`Listening on ${PORT}`)
     })
-})
-// register로 post 요청 처리
-
+    app.get('/', function(req, res) { 
+        res.send("Hello Whisckey guys!!!")
+    });
     // app.post('/login', async (req, res) => {
     //     const {email, password} = req.body
     //     const user = await db.collection('user').findOne({"email": req.body.email, "password": req.body.password}, (err, data) => {
