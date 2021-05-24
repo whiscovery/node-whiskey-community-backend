@@ -5,6 +5,7 @@ const PORT = process.env.PORT || 4000;
 const mongoose = require('mongoose');
 const { User } = require("./models/User");
 const { Whiskey } = require("./models/Whiskey");
+const { Comment } = require("./models/Comment");
 const cookieParser = require("cookie-parser");
 const { auth } = require("./middleware/auth");
 
@@ -32,10 +33,22 @@ app.get('/', function(req, res) {
     res.send("Hello Whisckey guys!!!")
 });
 
-app.get('/whiskey', (req, res) =>{
-  User.find().toArray((err, result) => {
-      res.json(result)
+app.get('/whiskey', (req, res, next) => {
+  Whiskey.find()
+  .then( (datas) => {
+    res.json(datas);
   })
+  .catch((err) => {
+    console.error(err);
+    next(err);
+  })
+})
+app.get('/whiskey/:id', (req, res)=>{
+  Whiskey.findOne({id: parseInt(req.params.id) }, (err, data) => {
+        if(err) return res.status(500).json({error: err});
+        if(!data) return res.status(404).json({error: 'Not found'});
+        res.json(data);
+    })
 })
 app.post('/writepost', (req, res) => {
     console.log("writepost 삽입 접근");
@@ -46,6 +59,43 @@ app.post('/writepost', (req, res) => {
     });
   });
 
+app.post('/editpost', (req, res) =>{
+    Whiskey.updateOne({id : parseInt(req.body.id) }, {$set : req.body}, () =>
+    {
+        console.log("수정완료");
+        const url = '/whiskey/' + req.body.id
+        res.redirect(url)
+    })
+})
+app.post('/writecomment', (req, res) => {
+  console.log("writepost 삽입 접근");
+  const comment = new Comment(req.body);
+  comment.save((err, commentInfo) => {
+    if (err) return res.json({ success: false, err });
+    return res.status(200).json({ success: true });
+  });
+});
+app.get('/comment/:id', (req, res)=>{
+    Comment.find({"위스키번호": parseInt(req.params.id) },  (err, comment) => { //find쓰기 위해서 toArray
+        if(err) return res.status(500).json({error: err});
+        if(!comment) return res.status(404).json({error: 'Not found'});
+
+        res.json(comment);
+    })
+})
+app.post('/writepost/taisting', (req, res) => {
+  Whiskey.findOne({id: parseInt(req.body.whiskeyid)}, (err, whiskeyInfo) => {
+    whiskeyInfo.테이스팅점수.push(req.body.테이스팅점수);
+    whiskeyInfo.save();
+    if (err) return res.json({ success: false, err });
+      return res.status(200).json({ success: true });
+  })
+  // Whiskey.updateMany({id : parseInt(req.body.whiskeyid)}, { $push: { 테이스팅점수: req.body.테이스팅점수}}, (err, success) => {
+  //   if (err) return res.json({ success: false, err });
+  //     return res.status(200).json({ success: true });
+  // });
+
+});
 
 app.post("/register", (req, res) => {
     const user = new User(req.body);
@@ -240,3 +290,19 @@ app.get("/auth", auth, (req, res) => {
     //     const url = '/whiskey/'+req.body.whiskeyid
     //     res.redirect(url)
     // });
+  //   {
+  //     "제품명": "Wild Turkey 101 Bourbon",
+  //     "종류": "버번 위스키",
+  //     "도수": "50.5",
+  //     "이미지": "https://static.whiskybase.com/storage/whiskies/9/1/817/143317-big.jpg",
+  //     "가격대": "남대문 주류상가 43,000원 (19년 기준)",
+  //     "테이스팅": "- Color(색) : 나무색에 가까운 짙은 노란색- Nose(향) : 빵굽는향, 바닐라, 토피, 스파이시, 전체적으로 카라...",
+  //     "설명": "● Wild Turky 101은 와일드 터키 위스키 중 가장 많이 팔리며 증류소를 대표하는 제품이며 101은 Proof으로 우...",
+  //     "기타지식": "프루프(proof)는 도수를 나타내는 단위 중 하나로 1/2하면 일반 도수가 된다(도량형 통일이 안되서 글렌파클라스 105는 ",
+  //     "테이스팅점수": []
+  // }
+
+//   {
+//     "whiskeyid": 1,
+//     "테이스팅점수": [10,20,30,40,50,60,70]
+// }

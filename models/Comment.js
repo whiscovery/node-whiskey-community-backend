@@ -1,40 +1,34 @@
 const mongoose = require("mongoose");
 const autoIdSetter = require('../middleware/auto-id-setter');
 
-const whiskeySchema = mongoose.Schema({
-  제품명: {
+const commentSchema = mongoose.Schema({
+  이름: {
     type: String,
     maxlength: 50,
   },
-  종류: {
+  장소: {
     type: String,
   },
-  도수: {
+  일시: {
     type: String,
   },
-  이미지: {
+  내용: {
     type: String,
   },
-  가격대: {
+  위스키이름: {
     type: String,
   },
-  테이스팅: {
+  이메일: {
     type: String,
   },
-  설명: {
+  위스키번호: {
     type: String,
-  },
-  기타지식: {
-    type: String,
-  },
-  테이스팅점수: {
-    type: Array,
-  },
+  }
 });
-autoIdSetter(whiskeySchema, mongoose, 'whiskey', 'id');
+autoIdSetter(commentSchema, mongoose, 'comment', 'id');
 
 // 모델 생성
 // 여기서 User가 MongoDB에서는 복수, 구분자 삭제등을 통해 users로 저장됨
-const Whiskey = mongoose.model("Whiskey", whiskeySchema);
+const Comment = mongoose.model("Comment", commentSchema);
 
-module.exports = { Whiskey };
+module.exports = { Comment };

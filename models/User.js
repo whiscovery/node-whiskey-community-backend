@@ -29,7 +29,8 @@ const userSchema = mongoose.Schema({
     default: 0,
   },  
 });
-autoIdSetter(userSchema, mongoose, 'application', 'id');
+// id값 자동 증가
+autoIdSetter(userSchema, mongoose, 'user', 'id');
 
 //save 메소드가 실행되기전에 비밀번호를 암호화하는 로직을 짜야한다
 userSchema.pre("save", function (next) {
