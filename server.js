@@ -83,6 +83,14 @@ app.get('/comment/:id', (req, res)=>{
         res.json(comment);
     })
 })
+app.get('/comment/search/:email', (req, res)=>{
+    Comment.find({"이메일": req.params.email }, (err, comment) => { //find쓰기 위해서 toArray
+        if(err) return res.status(500).json({error: err});
+        if(!comment) return res.status(404).json({error: 'Not found'});
+        
+        res.json(comment);
+    })
+})
 app.post('/writepost/taisting', (req, res) => {
   Whiskey.findOne({id: parseInt(req.body.whiskeyid)}, (err, whiskeyInfo) => {
     whiskeyInfo.테이스팅점수.push(req.body.테이스팅점수);
