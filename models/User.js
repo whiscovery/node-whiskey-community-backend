@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 const saltRounds = 10;
 const jwt = require("jsonwebtoken");
+const autoIdSetter = require('../middleware/auto-id-setter');
 
 const userSchema = mongoose.Schema({
   nick: {
@@ -26,10 +27,9 @@ const userSchema = mongoose.Schema({
   role: {
     type: Number,
     default: 0,
-  }
-  
+  },  
 });
-
+autoIdSetter(userSchema, mongoose, 'application', 'id');
 
 //save 메소드가 실행되기전에 비밀번호를 암호화하는 로직을 짜야한다
 userSchema.pre("save", function (next) {

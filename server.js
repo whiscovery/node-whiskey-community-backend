@@ -31,6 +31,22 @@ app.listen(PORT, () => {
 app.get('/', function(req, res) { 
     res.send("Hello Whisckey guys!!!")
 });
+
+app.get('/whiskey', (req, res) =>{
+  User.find().toArray((err, result) => {
+      res.json(result)
+  })
+})
+app.post('/writepost', (req, res) => {
+    console.log("writepost 삽입 접근");
+    const whiskey = new Whiskey(req.body);
+    whiskey.save((err, whiskeyInfo) => {
+      if (err) return res.json({ success: false, err });
+      return res.status(200).json({ success: true });
+    });
+  });
+
+
 app.post("/register", (req, res) => {
     const user = new User(req.body);
     user.save((err, userInfo) => {
@@ -107,11 +123,6 @@ app.get("/auth", auth, (req, res) => {
     });
   });
 
-app.get('/whiskey', (req, res) =>{
-    User.find().toArray((err, result) => {
-        res.json(result)
-    })
-})
 // register로 post 요청 처리
 
     // app.post('/login', async (req, res) => {
