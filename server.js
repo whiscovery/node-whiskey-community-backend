@@ -20,7 +20,7 @@ app.use(
 
 app.use(express.json());
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'vue-whiskey-community/dist')));
 //Mongoose 로 DB 접속
 const config = "mongodb+srv://whiscovery:wjdwlsdnr5728@cluster0.ngeoi.mongodb.net/whiskeyapp?retryWrites=true&w=majority"
 var db = mongoose.connect(config, {
@@ -38,7 +38,7 @@ app.listen(PORT, () => {
 })
 // /로 get 요청
 app.get('/', function(req, res) { 
-    res.sendfile(path.join(__dirname, './public/index.html'));
+    res.sendFile(path.join(__dirname, './vue-whiskey-community/dist/index.html'));
 });
 
 app.get('/whiskey', (req, res, next) => {
