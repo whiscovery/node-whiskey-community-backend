@@ -36,6 +36,7 @@ var db = mongoose.connect(config, {
 app.listen(PORT, () => {
     console.log(`Listening on ${PORT}`)
 })
+
 // /로 get 요청
 app.get('/', function(req, res) { 
     res.sendFile(path.join(__dirname, './vue-whiskey-community/dist/index.html'));
@@ -191,7 +192,9 @@ app.get("/auth", auth, (req, res) => {
     //   image: req.user.image,
     });
   });
-
+  app.get('*', function(req, res) { 
+    res.sendFile(path.join(__dirname, './vue-whiskey-community/dist/index.html'));
+  });
 // register로 post 요청 처리
 
     // app.post('/login', async (req, res) => {
