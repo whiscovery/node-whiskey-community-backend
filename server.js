@@ -1,4 +1,5 @@
 const express = require('express');
+// const config = require("./config/db");
 const app = express();
 const cors = require('cors')
 const PORT = process.env.PORT || 4000;
@@ -8,14 +9,21 @@ const { Whiskey } = require("./models/Whiskey");
 const { Comment } = require("./models/Comment");
 const cookieParser = require("cookie-parser");
 const { auth } = require("./middleware/auth");
+const path = require('path');
 
-app.use(cors());
+app.use(
+  cors({
+    origin: true,
+    credentials: true, //도메인이 다른경우 서로 쿠키등을 주고받을때 허용해준다고 한다
+  })
+);
+
 app.use(express.json());
 app.use(cookieParser());
-
+app.use(express.static(path.join(__dirname, 'public')));
 //Mongoose 로 DB 접속
-const dbAddress = "mongodb+srv://whiscovery:wjdwlsdnr5728@cluster0.ngeoi.mongodb.net/whiskeyapp?retryWrites=true&w=majority"
-var db = mongoose.connect(dbAddress, {
+const config = "mongodb+srv://whiscovery:wjdwlsdnr5728@cluster0.ngeoi.mongodb.net/whiskeyapp?retryWrites=true&w=majority"
+var db = mongoose.connect(config, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
     useCreateIndex: true,
@@ -30,7 +38,7 @@ app.listen(PORT, () => {
 })
 // /로 get 요청
 app.get('/', function(req, res) { 
-    res.send("Hello Whisckey guys!!!")
+    res.sendfile(path.join(__dirname, './public/index.html'));
 });
 
 app.get('/whiskey', (req, res, next) => {
@@ -135,14 +143,15 @@ app.post("/login", (req, res) => {
         user
             .generateToken()
             .then((user) => {
-                console.log("2");
-            res.cookie("x_auth", user.token).status(200).json({
-                loginSuccess: true,
-                userId: user._id,
-            });
+                res.cookie('x_auth', user.token, { maxAge: 10000 })
+                .status(200).json({
+                  loginSuccess: true,
+                  userId: user._id,
+                  token: user.token
+              });
             })
             .catch((err) => {
-            res.status(400).send(err);
+              res.status(400).send(err);
             });
 
         })
@@ -170,10 +179,12 @@ app.get("/auth", auth, (req, res) => {
     //req.user에 user값을 넣어줬으므로
     console.log("1");
     res.status(200).json({
-      _id: req._id,
+      _id: req.user._id,
     //   isAdmin: req.user.role === 09 ? false : true,
       isAuth: true,
       email: req.user.email,
+      nick: req.user.nick
+
     //   name: req.user.name,
     //   lastname: req.user.lastname,
     //   role: req.user.role,
