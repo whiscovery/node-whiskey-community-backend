@@ -136,9 +136,9 @@ app.post('/writepost/taisting', (req, res) => {
 
 });
 // /로 get 요청
-// app.get('/', function(req, res) { 
-//   res.sendFile(path.join(__dirname, './vue-whiskey-community/dist/index.html'));
-// });
-// app.get('*', (req, res) => { 
-//   res.sendFile(path.join(__dirname, './vue-whiskey-community/dist/index.html'));
-// });
+app.get('/', function(req, res) { 
+  res.sendFile(path.join(__dirname, './vue-whiskey-community/dist/index.html'));
+});
+app.get('*', (req, res) => { 
+  res.sendFile(path.join(__dirname, './vue-whiskey-community/dist/index.html'));
+});
