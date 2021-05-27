@@ -1,26 +1,35 @@
+
 const express = require('express');
-// const config = require("./config/db");
-const app = express();
-const cors = require('cors')
-const PORT = process.env.PORT || 4000;
 const mongoose = require('mongoose');
-const { User } = require("./models/User");
+const path = require('path');
+const cors = require('cors');
+const passport = require('passport');
+
+// const { User } = require("./models/User");
 const { Whiskey } = require("./models/Whiskey");
 const { Comment } = require("./models/Comment");
-const cookieParser = require("cookie-parser");
-const { auth } = require("./middleware/auth");
-const path = require('path');
 
-app.use(
-  cors({
-    origin: true,
-    credentials: true, //도메인이 다른경우 서로 쿠키등을 주고받을때 허용해준다고 한다
-  })
-);
+// Initialize the app
+const app = express();
+// Middlewares
+// Form Data Middleware
 
+
+// Json Body Middleware
 app.use(express.json());
-app.use(cookieParser());
+
+// Cors Middleware
+app.use(cors());
+
+// Seting up the static directory
 app.use(express.static(path.join(__dirname, 'vue-whiskey-community/dist')));
+
+// Use the passport Middleware
+app.use(passport.initialize());
+// Bring in the Passport Strategy
+require('./config/Passport')(passport);
+
+
 //Mongoose 로 DB 접속
 const config = "mongodb+srv://whiscovery:wjdwlsdnr5728@cluster0.ngeoi.mongodb.net/whiskeyapp?retryWrites=true&w=majority"
 var db = mongoose.connect(config, {
@@ -29,19 +38,37 @@ var db = mongoose.connect(config, {
     useCreateIndex: true,
     useFindAndModify: false,
   })
-  .then(() => console.log("MongoDB Connected"))
-  .catch((err) => console.log(err));
+  .then(() => {
+    console.log('Database connected successfully')
+  })
+  .catch(err => {
+      console.log(`Unable to connect with the database ${err}`)
+  });
+
+
 
 // Port 오픈
+const PORT = process.env.PORT || 4000;
+
 app.listen(PORT, () => {
     console.log(`Listening on ${PORT}`)
 })
+
+// app.get('/', (req, res) => {
+//     return res.send("<h1>Hello World</h1>");
+// });
+// Bring in the Users route
+const users = require('./routes/api/users');
+app.use('/api/users', users);
+
 
 // /로 get 요청
 app.get('/', function(req, res) { 
     res.sendFile(path.join(__dirname, './vue-whiskey-community/dist/index.html'));
 });
-
+app.get('*', (req, res) => { 
+  res.sendFile(path.join(__dirname, './vue-whiskey-community/dist/index.html'));
+});
 app.get('/whiskey', (req, res, next) => {
   Whiskey.find()
   .then( (datas) => {
@@ -114,87 +141,85 @@ app.post('/writepost/taisting', (req, res) => {
 
 });
 
-app.post("/register", (req, res) => {
-    const user = new User(req.body);
-    user.save((err, userInfo) => {
-        if (err) return res.json({ success: false, err });
-        return res.status(200).json({ success: true });
-    });
-});
-app.post("/login", (req, res) => {
-    //로그인을할때 아이디와 비밀번호를 받는다
-    User.findOne({ email: req.body.email }, (err, user) => {
-      if (err || !user) {
-        return res.json({
-          loginSuccess: false,
-          message: "존재하지 않는 아이디입니다.",
-        });
-      }
-      user
-        .comparePassword(req.body.password)
-        .then((isMatch) => {
-          if (!isMatch) {
-            return res.json({
-              loginSuccess: false,
-              message: "비밀번호가 일치하지 않습니다",
-            });
-          }
-          //비밀번호가 일치하면 토큰을 생성한다
-          //해야될것: jwt 토큰 생성하는 메소드 작성
-        user
-            .generateToken()
-            .then((user) => {
-                res.cookie('x_auth', user.token, { maxAge: 10000 })
-                .status(200).json({
-                  loginSuccess: true,
-                  userId: user._id,
-                  token: user.token
-              });
-            })
-            .catch((err) => {
-              res.status(400).send(err);
-            });
+// app.post("/register", (req, res) => {
+//     const user = new User(req.body);
+//     user.save((err, userInfo) => {
+//         if (err) return res.json({ success: false, err });
+//         return res.status(200).json({ success: true });
+//     });
+// });
+// app.post("/login", (req, res) => {
+//     //로그인을할때 아이디와 비밀번호를 받는다
+//     User.findOne({ email: req.body.email }, (err, user) => {
+//       if (err || !user) {
+//         return res.json({
+//           loginSuccess: false,
+//           message: "존재하지 않는 아이디입니다.",
+//         });
+//       }
+//       user
+//         .comparePassword(req.body.password)
+//         .then((isMatch) => {
+//           if (!isMatch) {
+//             return res.json({
+//               loginSuccess: false,
+//               message: "비밀번호가 일치하지 않습니다",
+//             });
+//           }
+//           //비밀번호가 일치하면 토큰을 생성한다
+//           //해야될것: jwt 토큰 생성하는 메소드 작성
+//         user
+//             .generateToken()
+//             .then((user) => {
+//                 res.cookie('x_auth', user.token, { maxAge: 10000 })
+//                 .status(200).json({
+//                   loginSuccess: true,
+//                   userId: user._id,
+//                   token: user.token
+//               });
+//             })
+//             .catch((err) => {
+//               res.status(400).send(err);
+//             });
 
-        })
-        .catch((err) => res.json({ loginSuccess: false, err }));
-    });
-  });
+//         })
+//         .catch((err) => res.json({ loginSuccess: false, err }));
+//     });
+//   });
 
 
-//user_id를 찾아서(auth를 통해 user의 정보에 들어있다) db에있는 토큰값을 비워준다
-app.get("/logout", auth, (req, res) => {
-    User.findOneAndUpdate({ _id: req.user._id }, { token: "" }, (err, user) => {
-      if (err) return res.json({ success: false, err });
-      res.clearCookie("x_auth");
-      console.log("logout");
-      return res.status(200).send({
-        success: true,
-      });
-    });
-  });
+// //user_id를 찾아서(auth를 통해 user의 정보에 들어있다) db에있는 토큰값을 비워준다
+// app.get("/logout", auth, (req, res) => {
+//     User.findOneAndUpdate({ _id: req.user._id }, { token: "" }, (err, user) => {
+//       if (err) return res.json({ success: false, err });
+//       res.clearCookie("x_auth");
+//       console.log("logout");
+//       return res.status(200).send({
+//         success: true,
+//       });
+//     });
+//   });
 
-  //auth 미들웨어를 가져온다
-//auth 미들웨어에서 필요한것 : Token을 찾아서 검증하기
-app.get("/auth", auth, (req, res) => {
-    //auth 미들웨어를 통과한 상태 이므로
-    //req.user에 user값을 넣어줬으므로
-    console.log("1");
-    res.status(200).json({
-      _id: req.user._id,
-    //   isAdmin: req.user.role === 09 ? false : true,
-      isAuth: true,
-      email: req.user.email,
-      nick: req.user.nick
+//   //auth 미들웨어를 가져온다
+// //auth 미들웨어에서 필요한것 : Token을 찾아서 검증하기
+// app.get("/auth", auth, (req, res) => {
+//     //auth 미들웨어를 통과한 상태 이므로
+//     //req.user에 user값을 넣어줬으므로
+//     console.log("1");
+//     res.status(200).json({
+//       _id: req.user._id,
+//     //   isAdmin: req.user.role === 09 ? false : true,
+//       isAuth: true,
+//       email: req.user.email,
+//       nick: req.user.nick
 
-    //   name: req.user.name,
-    //   lastname: req.user.lastname,
-    //   role: req.user.role,
-    //   image: req.user.image,
-    });
-  });
-  app.get('*', function(req, res) { 
-    res.sendFile(path.join(__dirname, './vue-whiskey-community/dist/index.html'));
-  });
+//     //   name: req.user.name,
+//     //   lastname: req.user.lastname,
+//     //   role: req.user.role,
+//     //   image: req.user.image,
+//     });
+//   });
+
 // register로 post 요청 처리
 
     // app.post('/login', async (req, res) => {
