@@ -66,9 +66,7 @@ app.use('/api/users', users);
 app.get('/', function(req, res) { 
     res.sendFile(path.join(__dirname, './vue-whiskey-community/dist/index.html'));
 });
-app.get('*', (req, res) => { 
-  res.sendFile(path.join(__dirname, './vue-whiskey-community/dist/index.html'));
-});
+
 app.get('/whiskey', (req, res, next) => {
   Whiskey.find()
   .then( (datas) => {
@@ -140,7 +138,9 @@ app.post('/writepost/taisting', (req, res) => {
   // });
 
 });
-
+app.get('*', (req, res) => { 
+  res.sendFile(path.join(__dirname, './vue-whiskey-community/dist/index.html'));
+});
 // app.post("/register", (req, res) => {
 //     const user = new User(req.body);
 //     user.save((err, userInfo) => {
