@@ -6,6 +6,7 @@ const userSchema = new Schema({
   nick: {
     type: String,
     maxlength: 50,
+    unique: 1,
     required: true
   },
   email: {

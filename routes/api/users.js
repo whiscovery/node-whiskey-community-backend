@@ -11,38 +11,68 @@ const User = require('../../models/User');
  * @desc Register the User
  * @access Public
  */
+ router.post('/register/checkemail', (req, res) => {
+    // Check for the Unique Email
+    User.findOne({
+        email: req.body.email
+    }).then(user => {
+        if (user) {
+            return res.status(400).json({
+                msg: "Email is already registred.",
+                checkemail: false
+            });
+        } else {
+            return res.status(201).json({
+                msg: "You can use this email.",
+                checkemail: true
+            });
+        }
+    });
+ });
+
+ router.post('/register/checknick', (req, res) => {
+    // Check for the Unique Nick
+    User.findOne({
+        nick: req.body.nick
+    }).then(user => {
+        if (user) {
+            return res.status(400).json({
+                msg: "Nickname is already registred.",
+                checknick: false
+            });
+        } else {
+            return res.status(201).json({
+                msg: "You can use this nickname.",
+                checknick: true
+            });
+        }
+    });
+ });
+
  router.post('/register', (req, res) => {
     let {
         nick,
         email,
         password,
-        confirm_password
+        confirm_password,
+        checkemail,
+        checknick
     } = req.body
-    // Check for the unique Username
-    User.findOne({
-        nick: nick
-    }).then(user => {
-        if (user) {
-            return res.status(400).json({
-                msg: "Username is already taken."
-            });
-        }
-    })
-    // Check for the Unique Email
-    User.findOne({
-        email: email
-    }).then(user => {
-        if (user) {
-            return res.status(400).json({
-                msg: "Email is already registred. Did you forgot your password."
-            });
-        }
-    });
+
     if (password !== confirm_password) {
         return res.status(400).json({
             msg: "Password do not match."
         });
+    } else if (!checknick) {
+        return res.status(400).json({
+            msg: "닉네임 중복 체크해주세요"
+        });
+    } else if (!checkemail) {
+        return res.status(400).json({
+            msg: "이메일중복체크해주세요"
+        });
     }
+    
     
     // The data is valid and new we can register the user
     let newUser = new User({
