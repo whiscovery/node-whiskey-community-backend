@@ -73,7 +73,6 @@ const User = require('../../models/User');
         });
     }
     
-    
     // The data is valid and new we can register the user
     let newUser = new User({
         nick,
