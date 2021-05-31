@@ -48,7 +48,7 @@ var db = mongoose.connect(config, {
 
 
 // Port 오픈
-const PORT = process.env.PORT || 4000;
+const PORT = process.env.PORT || 80;
 
 app.listen(PORT, () => {
     console.log(`Listening on ${PORT}`)
