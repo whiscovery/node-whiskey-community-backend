@@ -114,6 +114,14 @@ app.get('/comment/:id', (req, res)=>{
         res.json(comment);
     })
 })
+app.post('/comment/delete/:id', (req, res) => {
+  console.log("코멘트삭제" + req.params.id)
+  Comment.deleteOne({"_id":  req.params.id }, (err, msg) => {
+    if(err) return res.status(500).json({error: err});
+    if(!msg) return res.status(404).json({error: 'Not found'});
+      res.json(msg);
+  })
+})
 app.get('/comment/search/:email', (req, res)=>{
     Comment.find({"이메일": req.params.email }, (err, comment) => { //find쓰기 위해서 toArray
         if(err) return res.status(500).json({error: err});
