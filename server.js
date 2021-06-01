@@ -114,11 +114,12 @@ app.get('/comment/:id', (req, res)=>{
         res.json(comment);
     })
 })
-app.post('/comment/delete/:id', (req, res) => {
+app.delete('/comment/delete/:id', (req, res) => {
   console.log("코멘트삭제" + req.params.id)
-  Comment.deleteOne({"_id":  req.params.id }, (err, msg) => {
+  Comment.deleteOne({"id":  parseInt(req.params.id) }, (err, info) => {
     if(err) return res.status(500).json({error: err});
     if(!msg) return res.status(404).json({error: 'Not found'});
+    var msg = { "msg" : req.params.id }
       res.json(msg);
   })
 })

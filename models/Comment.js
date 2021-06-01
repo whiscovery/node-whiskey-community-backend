@@ -24,6 +24,11 @@ const commentSchema = mongoose.Schema({
   위스키번호: {
     type: String,
     default: 0
+  },
+  패스워드: {
+    type: String,
+    minLength: 4,
+    required: true
   }
 });
 autoIdSetter(commentSchema, mongoose, 'comment', 'id');
