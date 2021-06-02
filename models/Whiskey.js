@@ -30,6 +30,9 @@ const whiskeySchema = mongoose.Schema({
   테이스팅점수: {
     type: Array,
   },
+  특이사항: {
+    type: String
+  }
 });
 autoIdSetter(whiskeySchema, mongoose, 'whiskey', 'id');
 
