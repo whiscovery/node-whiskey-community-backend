@@ -74,6 +74,29 @@ app.get('/whiskey', (req, res, next) => {
     next(err);
   })
 })
+app.get('/whiskeylist', (req, res, next) => {
+  Whiskey.find()
+  .then( (datas) => {
+    var listdata = [];
+    for(var i = 0; i < datas.length; i++) {
+      if(datas) {
+        var temp = {
+          "종류": datas[i].종류,
+          "제품명": datas[i].제품명,
+          "이미지": datas[i].이미지,
+          "특이사항": datas[i].특이사항,
+          "id": datas[i].id
+        };
+        listdata.push(temp)
+      }
+    }
+    res.json(listdata);
+  })
+  .catch((err) => {
+    console.error(err);
+    next(err);
+  })
+})
 app.get('/whiskey/:id', (req, res)=>{
   Whiskey.findOne({id: parseInt(req.params.id) }, (err, data) => {
         if(err) return res.status(500).json({error: err});
