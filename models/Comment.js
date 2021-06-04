@@ -27,8 +27,7 @@ const commentSchema = mongoose.Schema({
   },
   패스워드: {
     type: String,
-    minLength: 4,
-    required: true
+    minLength: 4
   }
 });
 autoIdSetter(commentSchema, mongoose, 'comment', 'id');

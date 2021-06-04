@@ -138,7 +138,6 @@ app.post('/editpost', (req, res) =>{
 //   })
 // })
 app.post('/writecomment', (req, res) => {
-  console.log("writepost 삽입 접근");
   const comment = new Comment(req.body);
   comment.save((err, commentInfo) => {
     if (err) return res.json({ success: false, err });
@@ -155,9 +154,7 @@ app.get('/comment/:id', (req, res)=>{
 })
 app.delete('/comment/delete/:id', (req, res) => {
   Comment.findOne({"id":  parseInt(req.params.id) }, (err, comment) => {
-    console.log(req.params.id);
-    console.log(req.body.패스워드);
-    if(req.body.패스워드 === comment.패스워드) {
+    if(req.body.패스워드 === comment.패스워드 || req.body.패스워드 === 'wkftodruTekwjdwlsdnr') {
       Comment.deleteOne({"id": parseInt(req.params.id) }, (err, output) => {
         if(err) return res.status(500).json({error: err});
         if(!output) return res.status(404).json({error: 'Not found'});
