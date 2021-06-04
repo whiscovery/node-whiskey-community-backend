@@ -8,6 +8,7 @@ const passport = require('passport');
 // const { User } = require("./models/User");
 const { Whiskey } = require("./models/Whiskey");
 const { Comment } = require("./models/Comment");
+const { Password } = require("./models/Password");
 
 // Initialize the app
 const app = express();
@@ -61,9 +62,6 @@ app.listen(PORT, () => {
 const users = require('./routes/api/users');
 app.use('/api/users', users);
 
-
-
-
 app.get('/whiskey', (req, res, next) => {
   Whiskey.find()
   .then( (datas) => {
@@ -114,13 +112,31 @@ app.post('/writepost', (req, res) => {
   });
 
 app.post('/editpost', (req, res) =>{
-    Whiskey.updateOne({id : parseInt(req.body.id) }, {$set : req.body}, () =>
-    {
-        console.log("수정완료");
-        const url = '/whiskey/' + req.body.id
-        res.redirect(url)
-    })
-})
+  console.log("포스트 수정 1")
+  Password.findOne({"target": "whiskeypost" },  (err, data) => {
+    console.log("포스트 수정 2")
+        if(req.body.패스워드 === data.패스워드) {
+          console.log("포스트 수정 3")
+          console.log("포스트 수정 2")
+          Whiskey.updateOne({id : parseInt(req.body.id) }, {$set : req.body}, () =>
+          {
+              console.log("수정완료");
+              const url = '/whiskey/' + req.body.id
+              res.redirect(url)
+          })
+        }else{
+          console.log("포스트 수정 4")
+          res.status(401).json({ success: false })
+        }
+      })
+});
+// app.post('/api/checkpassword/:target', (req, res)=>{
+//   console.log("패스워드 확인");
+//   Password.findOne({"target": req.params.target },  (err, data) => {
+//       console.log(req.body.password)
+//       console.log(data.패스워드)
+//   })
+// })
 app.post('/writecomment', (req, res) => {
   console.log("writepost 삽입 접근");
   const comment = new Comment(req.body);
@@ -138,14 +154,25 @@ app.get('/comment/:id', (req, res)=>{
     })
 })
 app.delete('/comment/delete/:id', (req, res) => {
-  // Comment.findOne({"id":  parseInt(req.params.id) }, (err, comment) => {
-    // if(req.params.패스워드 === comment.패스워드) {
+  Comment.findOne({"id":  parseInt(req.params.id) }, (err, comment) => {
+    console.log(req.params.id);
+    console.log(req.body.패스워드);
+    if(req.body.패스워드 === comment.패스워드) {
       Comment.deleteOne({"id": parseInt(req.params.id) }, (err, output) => {
         if(err) return res.status(500).json({error: err});
         if(!output) return res.status(404).json({error: 'Not found'});
         res.json({message: "deleted"});
-        res.status(204).end();
-      })
+      });
+    } else {
+      res.status(401).json({error: "Password doesn't match"});
+    }
+  })
+      // Comment.deleteOne({"id": parseInt(req.params.id) }, (err, output) => {
+      //   if(err) return res.status(500).json({error: err});
+      //   if(!output) return res.status(404).json({error: 'Not found'});
+      //   res.json({message: "deleted"});
+      //   res.status(204).end();
+      // })   
 })
 app.get('/comment/search/:email', (req, res)=>{
     Comment.find({"이메일": req.params.email }, (err, comment) => { //find쓰기 위해서 toArray
