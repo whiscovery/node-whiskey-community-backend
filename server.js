@@ -144,6 +144,16 @@ app.post('/writecomment', (req, res) => {
     return res.status(200).json({ success: true });
   });
 });
+app.get('/comment', (req, res, next)=>{
+    Comment.find()
+    .then( (datas) => {
+      res.json(datas);
+    })
+    .catch((err) => {
+      console.error(err);
+      next(err);
+    })
+})
 app.get('/comment/:id', (req, res)=>{
     Comment.find({"위스키번호": parseInt(req.params.id) },  (err, comment) => { //find쓰기 위해서 toArray
         if(err) return res.status(500).json({error: err});
