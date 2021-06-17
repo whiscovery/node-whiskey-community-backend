@@ -72,6 +72,27 @@ app.get('/info', (req, res, next) => {
     next(err);
   })
 })
+app.get('/infolist', (req, res, next) => {
+  Info.find()
+  .then( (datas) => {
+    var listdata = [];
+    for(var i = 0; i < datas.length; i++) {
+      if(datas) {
+        var temp = {
+          "제목": datas[i].제목,
+          "id": datas[i].id,
+          "_id": datas[i]._id
+        };
+        listdata.push(temp)
+      }
+    }
+    res.json(listdata);
+  })
+  .catch((err) => {
+    console.error(err);
+    next(err);
+  })
+})
 app.post('/writeinfo', (req, res) => {
   console.log("writeinfo 삽입 접근");
   const info = new Info(req.body);

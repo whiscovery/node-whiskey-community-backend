@@ -11,6 +11,9 @@ const infoSchema = mongoose.Schema({
   패스워드: {
     type: String,
     minLength: 4
+  },
+   키워드: {
+    type: String
   }
 });
 autoIdSetter(infoSchema, mongoose, 'info', 'id');
