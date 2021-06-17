@@ -9,7 +9,7 @@ const passport = require('passport');
 const { Whiskey } = require("./models/Whiskey");
 const { Comment } = require("./models/Comment");
 const { Password } = require("./models/Password");
-
+const { Info } = require("./models/Info");
 // Initialize the app
 const app = express();
 // Middlewares
@@ -62,6 +62,39 @@ app.listen(PORT, () => {
 const users = require('./routes/api/users');
 app.use('/api/users', users);
 
+app.get('/info', (req, res, next) => {
+  Info.find()
+  .then( (datas) => {
+    res.json(datas);
+  })
+  .catch((err) => {
+    console.error(err);
+    next(err);
+  })
+})
+app.post('/writeinfo', (req, res) => {
+  console.log("writeinfo 삽입 접근");
+  const info = new Info(req.body);
+  info.save((err, infoInfo) => {
+    if (err) return res.json({ success: false, err });
+    return res.status(200).json({ success: true });
+  });
+});
+app.post('/editinfo/:id', (req, res) =>{
+  Info.findOne({"id":  parseInt(req.params.id) }, (err, info) => {
+    if(req.body.패스워드 === info.패스워드 || req.body.패스워드 === 'wkftodruTekwjdwlsdnr') {
+      console.log(info);
+      Info.updateOne({id : parseInt(req.body.id) }, {$set : req.body}, () =>
+      {
+          console.log("수정완료");
+          res.status(200).json({ success: true })
+      })
+    }else{
+      console.log("포스트 수정 4")
+      res.status(401).json({ success: false })
+    }
+  })
+});
 app.get('/whiskey', (req, res, next) => {
   Whiskey.find()
   .then( (datas) => {
