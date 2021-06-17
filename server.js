@@ -81,7 +81,8 @@ app.get('/infolist', (req, res, next) => {
         var temp = {
           "제목": datas[i].제목,
           "id": datas[i].id,
-          "_id": datas[i]._id
+          "_id": datas[i]._id,
+          "키워드": datas[i].키워드
         };
         listdata.push(temp)
       }
