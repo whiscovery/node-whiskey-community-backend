@@ -94,6 +94,13 @@ app.get('/infolist', (req, res, next) => {
     next(err);
   })
 })
+app.get('/info/:id', (req, res, next) => {
+  Info.findOne({"id":  parseInt(req.params.id) }, (err, data) => {
+    if(err) return res.status(500).json({error: err});
+    if(!data) return res.status(404).json({error: 'Not found'});
+    res.json(data);
+  })
+})
 app.post('/writeinfo', (req, res) => {
   console.log("writeinfo 삽입 접근");
   const info = new Info(req.body);
