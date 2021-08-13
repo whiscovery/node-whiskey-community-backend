@@ -32,7 +32,7 @@ require('./config/Passport')(passport);
 
 
 //Mongoose 로 DB 접속
-const config = "mongodb+srv://whiscovery:wjdwlsdnr5728@cluster0.ngeoi.mongodb.net/whiskeyapp?retryWrites=true&w=majority"
+const config = "mongodb+srv://whiscovery:[pass]@cluster0.ngeoi.mongodb.net/whiskeyapp?retryWrites=true&w=majority"
 var db = mongoose.connect(config, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
